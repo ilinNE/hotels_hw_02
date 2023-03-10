@@ -1,9 +1,6 @@
-
-const HOST = "localhost";
-const PORT = "8000";
-
 const http = require('http');
-const router = require('./endpoints.js')
+const router = require('./router.js')
+const settings = require('./settings.js')
 
 
 server = http.createServer( (req, res) => {
@@ -22,7 +19,7 @@ server = http.createServer( (req, res) => {
         const path = router.getPath(url)
         if (!path){
             res.writeHeader(404, {'Content-Type': "application/json"});
-            res.end('{"error":"Not Found"}');
+            res.end('{"404":"Not Found"}');
         }
         const handler = path[method];
         if (!handler) {
@@ -34,8 +31,6 @@ server = http.createServer( (req, res) => {
     });
 })
 
-
-
-server.listen(PORT, HOST,  () => {
+server.listen(settings.PORT, settings.HOST,  () => {
     console.log('server starts')}
 );

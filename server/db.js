@@ -1,7 +1,15 @@
-const initOptions = {}
-const pgp = require('pg-promise')(initOptions)
-const cn = 'postgres://node_user:Mellon5851@127.0.0.1:5432/node_db'
+const settings = require('./settings');
+
+const pgp = require('pg-promise')({})
+const cn = (
+    `postgres://${settings.DB_USER}` 
+    + `:${settings.DB_PASSWORD}`
+    + `@${settings.DB_HOST}`
+    + `:${settings.DB_PORT}`
+    + `/${settings.DB_NAME}`
+    )
+
 const db = pgp(cn);
 
-module.exports = db;
+module.exports = [db, pgp];
 

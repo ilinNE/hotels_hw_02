@@ -9,8 +9,8 @@ CREATE TABLE films (
     year SMALLINT 
 );
 
-CREATE TABLE filmGenre (
-    filmId INTEGER REFERENCES films(id) ON DELETE CASCADE,
-    genreId INTEGER REFERENCES genres(id) ON DELETE CASCADE,
-    PRIMARY KEY (filmId, genreId)
+CREATE TABLE film_genre (
+    film_id INTEGER REFERENCES films(id) ON DELETE CASCADE,
+    genre_id INTEGER REFERENCES genres(id) ON DELETE CASCADE,
+    PRIMARY KEY (film_id, genre_id)
 );

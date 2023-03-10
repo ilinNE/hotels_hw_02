@@ -1,5 +1,4 @@
-const db = require('./db');
-const pgp = require('pg-promise')();
+const [db, pgp] = require('./db');
 
 
 async function sendOK(response, result) {
@@ -13,8 +12,8 @@ async function createFilmHandler(req, res) {
         `INSERT INTO films(name, year) VALUES ($1, $2) RETURNING *`, [name, year]
     );
     newFilm.genres = await db.any(`SELECT id, name FROM genres WHERE id in ($1:csv)`,[genres] )
-    const cs = new pgp.helpers.ColumnSet(['filmid', 'genreid'], {table: 'filmgenre'});
-    const values = genres.map(item => {return {"filmid": newFilm.id, "genreid": item}})
+    const cs = new pgp.helpers.ColumnSet(['film_id', 'genre_id'], {table: 'film_genre'});
+    const values = genres.map(item => {return {"film_id": newFilm.id, "genre_id": item}})
     const query = pgp.helpers.insert(values, cs);
     await db.none(query);
     await sendOK(res, JSON.stringify(newFilm));
@@ -30,10 +29,10 @@ async function getFilmsHandler(req, res) {
     await db.any('SELECT * FROM films')
     .then( async (films) => {return Promise.all(films.map(async (film) => {
         let genres = await db.any(
-            `SELECT genreid AS id, name
-            FROM filmgenre
-            JOIN genres ON filmgenre.genreid = genres.id
-            WHERE filmid = $1`, [film.id]
+            `SELECT genre_id AS id, name
+            FROM film_genre
+            JOIN genres ON film_genre.genre_id = genres.id
+            WHERE film_id = $1`, [film.id]
         )
         film.genres = genres
         return film
@@ -45,10 +44,10 @@ async function getFilmHandler(req, res) {
     const id = req.url.match(/\d+/)[0];
     const film = await db.one(`SELECT * FROM films WHERE id = $1`, [id]);
     const genres = await db.any(
-        `SELECT genreid AS id, name
-         FROM filmgenre
-         JOIN genres ON filmgenre.genreid = genres.id
-         WHERE filmid = $1`, [id]
+        `SELECT genre_id AS id, name
+         FROM film_genre
+         JOIN genres ON film_genre.genre_id = genres.id
+         WHERE film_id = $1`, [id]
     )
     film.genres = genres
     await sendOK(res, JSON.stringify(film));
@@ -94,9 +93,22 @@ async function updateFilmHandler(req, res) {
     );
     updatedFilm.genres = await db.any(`SELECT id, name FROM genres WHERE id in ($1:csv)`,[genres] )
     db.none(`DELETE FROM filmgenre WHERE filmid = $1`, [id])
-    const cs = new pgp.helpers.ColumnSet(['filmid', 'genreid'], {table: 'filmgenre'});
-    const values = genres.map(item => {return {"filmid": updatedFilm.id, "genreid": item}})
+    const cs = new pgp.helpers.ColumnSet(['film_id', 'genre_id'], {table: 'film_genre'});
+    const values = genres.map(item => {return {"film_id": updatedFilm.id, "genre_id": item}})
     const query = pgp.helpers.insert(values, cs);
     await db.none(query);
     await sendOK(res, JSON.stringify(updatedFilm));
 };
+
+module.exports = [
+    createFilmHandler,
+    createGeneHandler,
+    getFilmHandler,
+    getFilmsHandler,
+    getGenreHandler,
+    getGenresHandler,
+    updateFilmHandler,
+    updateGenreHandler,
+    deleteFilmHandler,
+    deleteGenreHandler    
+]

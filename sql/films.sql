@@ -125,5 +125,5 @@ CREATE TABLE  reviews (
     author_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     create_timestamp DATE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_positive BOOLEAN NOT NULL,
-    content TEXT NOT NULL,
+    content TEXT NOT NULL
 );
